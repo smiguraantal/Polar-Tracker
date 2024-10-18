@@ -18,9 +18,4 @@ public class ExerciseSummaryResponse {
     private String duration;
     private Double distance;
     private Integer averageHeartRate;
-
-//    public long convertISOToMillis(String isoDuration) {
-//        Duration duration = Duration.parse(isoDuration);
-//        return duration.toMillis();
-//    }
 }

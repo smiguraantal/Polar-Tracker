@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,12 +52,6 @@ public class ExerciseService {
 
     @Autowired
     private ExerciseSummaryFormatter formatter;
-
-    public ExerciseDto findById(Long id) {
-        Exercise exercise = exerciseRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Exercise not found"));
-        return convertToDto(exercise);
-    }
 
     public void fetchAndSaveExercises() {
         try {
@@ -114,24 +107,10 @@ public class ExerciseService {
         }
     }
 
-    public List<ExerciseSummaryResponse> getLongestDistanceExercise() {
-        OptionalDouble longDistance = getExerciseSummaries().stream()
-                .mapToDouble(ExerciseSummaryResponse::getDistance)
-                .max();
-
-        return longDistance.isPresent() ? getExerciseSummaries().stream()
-                .filter(exercise -> exercise.getDistance() == longDistance.getAsDouble())
-                .collect(Collectors.toList()) : Collections.emptyList();
-    }
-
-    public List<ExerciseSummaryResponse> getHighestAverageHeartRateExercise() {
-        OptionalInt maxHeartRate = getExerciseSummaries().stream()
-                .mapToInt(ExerciseSummaryResponse::getAverageHeartRate)
-                .max();
-
-        return maxHeartRate.isPresent() ? getExerciseSummaries().stream()
-                .filter(exercise -> exercise.getAverageHeartRate() == maxHeartRate.getAsInt())
-                .collect(Collectors.toList()) : Collections.emptyList();
+    public ExerciseDto findById(Long id) {
+        Exercise exercise = exerciseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Exercise not found"));
+        return convertToExerciseDto(exercise);
     }
 
     public List<ExerciseSummaryResponse> getExerciseSummaries() {
@@ -156,75 +135,30 @@ public class ExerciseService {
         return formatter.formatSummaries(exerciseSummaries);
     }
 
+    public List<ExerciseSummaryResponse> getLongestDistanceExercise() {
+        OptionalDouble longDistance = getExerciseSummaries().stream()
+                .mapToDouble(ExerciseSummaryResponse::getDistance)
+                .max();
+
+        return longDistance.isPresent() ? getExerciseSummaries().stream()
+                .filter(exercise -> exercise.getDistance() == longDistance.getAsDouble())
+                .collect(Collectors.toList()) : Collections.emptyList();
+    }
+
+    public List<ExerciseSummaryResponse> getHighestAverageHeartRateExercise() {
+        OptionalInt maxHeartRate = getExerciseSummaries().stream()
+                .mapToInt(ExerciseSummaryResponse::getAverageHeartRate)
+                .max();
+
+        return maxHeartRate.isPresent() ? getExerciseSummaries().stream()
+                .filter(exercise -> exercise.getAverageHeartRate() == maxHeartRate.getAsInt())
+                .collect(Collectors.toList()) : Collections.emptyList();
+    }
+
     public String getTotalDuration() {
         return DurationConverter.formatDuration(exerciseRepository.sumDuration());
     }
 
-    private ExerciseDto convertToDto(Exercise exercise) {
-        return ExerciseDto.builder()
-                .exerciseId(exercise.getExerciseId())
-                .uploadTime(exercise.getUploadTime())
-                .polarUser(exercise.getPolarUser())
-                .device(exercise.getDevice())
-                .deviceId(exercise.getDeviceId())
-                .startTime(exercise.getStartTime())
-                .startTimeUtcOffset(exercise.getStartTimeUtcOffset())
-                .duration(DurationConverter.millisToIso(exercise.getDuration()))
-                .distance(exercise.getDistance())
-                .heartRate(convertToHeartRateDto(exercise.getAverageHeartRate(), exercise.getMaxHeartRate()))
-                .trainingLoad(exercise.getTrainingLoad())
-                .sport(exercise.getSport())
-                .hasRoute(exercise.getHasRoute())
-                .detailedSportInfo(exercise.getDetailedSportInfo())
-                .calories(exercise.getCalories())
-                .runningIndex(exercise.getRunningIndex())
-                .heartRateZones(convertToHeartRateZoneDtos(exercise.getHeartRateZones()))
-//                .route(convertToRoutePointDtos(exercise.getRoutePoints()))
-//                .samples(convertToSampleDtos(exercise.getHeartRateSamples()))
-                .build();
-    }
-
-    private HeartRateDto convertToHeartRateDto(int average, int maximum) {
-        HeartRateDto heartRateDto = new HeartRateDto();
-        heartRateDto.setAverage(average);
-        heartRateDto.setMaximum(maximum);
-        return heartRateDto;
-    }
-
-    private List<HeartRateZoneDto> convertToHeartRateZoneDtos(List<HeartRateZone> heartRateZones) {
-        return heartRateZones.stream()
-                .map(zone -> HeartRateZoneDto.builder()
-                        .index(zone.getIndex())
-                        .lowerLimit(zone.getLowerLimit())
-                        .upperLimit(zone.getUpperLimit())
-                        .inZone(DurationConverter.millisToIso(zone.getInZone()))
-                        .build())
-                .collect(Collectors.toList());
-    }
-
-    private List<RoutePointDto> convertToRoutePointDtos(List<RoutePoint> routePoints) {
-        return routePoints.stream()
-                .map(point -> RoutePointDto.builder()
-                        .latitude(point.getLatitude())
-                        .longitude(point.getLongitude())
-                        .time(DurationConverter.millisToIso(point.getTime()))
-                        .satellites(point.getSatellites())
-                        .fix(point.getFix())
-                        .build())
-                .collect(Collectors.toList());
-    }
-
-    private List<SampleDto> convertToSampleDtos(List<HeartRateSample> heartRateSamples) {
-        return heartRateSamples.stream()
-                .map(sample -> {
-                    SampleDto sampleDto = new SampleDto();
-                    sampleDto.setSampleType(0);
-                    sampleDto.setRecordingRate(sample.getRecordingRate());
-                    sampleDto.setData(String.valueOf(sample.getHeartRateValue()));
-                    return sampleDto;
-                })
-                .collect(Collectors.toList());
-    }
 
     private Exercise convertToExercise(ExerciseDto dto) {
         return Exercise.builder()
@@ -248,6 +182,31 @@ public class ExerciseService {
                 .build();
     }
 
+    private ExerciseDto convertToExerciseDto(Exercise exercise) {
+        return ExerciseDto.builder()
+                .exerciseId(exercise.getExerciseId())
+                .uploadTime(exercise.getUploadTime())
+                .polarUser(exercise.getPolarUser())
+                .device(exercise.getDevice())
+                .deviceId(exercise.getDeviceId())
+                .startTime(exercise.getStartTime())
+                .startTimeUtcOffset(exercise.getStartTimeUtcOffset())
+                .duration(DurationConverter.millisToIso(exercise.getDuration()))
+                .distance(exercise.getDistance())
+                .heartRate(convertToHeartRateDto(exercise.getAverageHeartRate(), exercise.getMaxHeartRate()))
+                .trainingLoad(exercise.getTrainingLoad())
+                .sport(exercise.getSport())
+                .hasRoute(exercise.getHasRoute())
+                .detailedSportInfo(exercise.getDetailedSportInfo())
+                .calories(exercise.getCalories())
+                .runningIndex(exercise.getRunningIndex())
+                .heartRateZones(convertToHeartRateZoneDtos(exercise.getHeartRateZones()))
+                .route(convertToRoutePointDtos(exercise.getRoutePoints()))
+                .samples(convertToSampleDtos(exercise.getHeartRateSamples()))
+                .build();
+    }
+
+
     private List<HeartRateZone> convertToHeartRateZones(List<HeartRateZoneDto> dtos, Exercise exercise) {
         return dtos.stream()
                 .map(dto -> HeartRateZone.builder()
@@ -259,6 +218,18 @@ public class ExerciseService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    private List<HeartRateZoneDto> convertToHeartRateZoneDtos(List<HeartRateZone> heartRateZones) {
+        return heartRateZones.stream()
+                .map(zone -> HeartRateZoneDto.builder()
+                        .index(zone.getIndex())
+                        .lowerLimit(zone.getLowerLimit())
+                        .upperLimit(zone.getUpperLimit())
+                        .inZone(DurationConverter.millisToIso(zone.getInZone()))
+                        .build())
+                .collect(Collectors.toList());
+    }
+
 
     private List<RoutePoint> convertToRoutePoints(List<RoutePointDto> dtoList, Exercise exercise) {
         return dtoList.stream()
@@ -272,6 +243,39 @@ public class ExerciseService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    private List<RoutePointDto> convertToRoutePointDtos(List<RoutePoint> routePoints) {
+        return routePoints.stream()
+                .map(point -> RoutePointDto.builder()
+                        .latitude(point.getLatitude())
+                        .longitude(point.getLongitude())
+                        .time(DurationConverter.millisToIso(point.getTime()))
+                        .satellites(point.getSatellites())
+                        .fix(point.getFix())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+
+    private HeartRateDto convertToHeartRateDto(int average, int maximum) {
+        HeartRateDto heartRateDto = new HeartRateDto();
+        heartRateDto.setAverage(average);
+        heartRateDto.setMaximum(maximum);
+        return heartRateDto;
+    }
+
+    private List<SampleDto> convertToSampleDtos(List<HeartRateSample> heartRateSamples) {
+        return heartRateSamples.stream()
+                .map(sample -> {
+                    SampleDto sampleDto = new SampleDto();
+                    sampleDto.setSampleType(0);
+                    sampleDto.setRecordingRate(sample.getRecordingRate());
+                    sampleDto.setData(String.valueOf(sample.getHeartRateValue()));
+                    return sampleDto;
+                })
+                .collect(Collectors.toList());
+    }
+
 
     private List<HeartRateSample> convertToHeartRateSamples(List<SampleDto> sampleDtos, Exercise exercise) {
         return sampleDtos.stream()

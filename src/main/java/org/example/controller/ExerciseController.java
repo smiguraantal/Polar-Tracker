@@ -19,14 +19,14 @@ public class ExerciseController {
     @Autowired
     private ExerciseService exerciseService;
 
-    @GetMapping("/exercises/{id}")
-    public ExerciseDto getExerciseById(@PathVariable("id") Long id) {
-        return exerciseService.findById(id);
-    }
-
     @GetMapping("/save-exercises")
     public void saveExercises() {
         exerciseService.fetchAndSaveExercises();
+    }
+
+    @GetMapping("/exercises/{id}")
+    public ExerciseDto getExerciseById(@PathVariable("id") Long id) {
+        return exerciseService.findById(id);
     }
 
     @GetMapping("/exercise-summaries")
@@ -36,7 +36,7 @@ public class ExerciseController {
 
     @GetMapping("/formatted-exercise-summaries")
     public List<FormattedExerciseSummaryResponse> getFormattedExerciseSummaries() {
-        return exerciseService.getFormattedExerciseSummaries(); // A szolgáltatásban hívod meg a formattert
+        return exerciseService.getFormattedExerciseSummaries();
     }
 
     @GetMapping("/longest-distance")
