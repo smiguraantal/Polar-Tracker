@@ -28,7 +28,9 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
@@ -158,6 +160,40 @@ public class ExerciseService {
     public String getTotalDuration() {
         return DurationConverter.formatDuration(exerciseRepository.sumDuration());
     }
+
+    public String getTotalDurationBySport(String sport) {
+        return DurationConverter.formatDuration(exerciseRepository.sumDurationBySport(sport));
+    }
+
+    public Map<String, String> getTotalDurationGroupedBySport() {
+        List<Object[]> results = exerciseRepository.sumDurationGroupedBySport();
+        Map<String, String> durationsBySport = new HashMap<>();
+
+        for (Object[] result : results) {
+            String sport = (String) result[0];
+            long durationMillis = (long) result[1];
+            String formattedDuration = DurationConverter.formatDuration(durationMillis);
+            durationsBySport.put(sport, formattedDuration);
+        }
+
+        return durationsBySport;
+    }
+
+    public Map<String, String> avgDurationGroupedBySport() {
+        List<Object[]> results = exerciseRepository.avgDurationGroupedBySport();
+        Map<String, String> avgDurations = new HashMap<>();
+
+        for (Object[] result : results) {
+            String sport = (String) result[0];
+            long avgDurationMillis = ((Number) result[1]).longValue(); // Assuming duration is in milliseconds
+            String formattedDuration = DurationConverter.formatDuration(avgDurationMillis);
+            avgDurations.put(sport, formattedDuration);
+        }
+
+        return avgDurations;
+    }
+
+
 
 
     private Exercise convertToExercise(ExerciseDto dto) {

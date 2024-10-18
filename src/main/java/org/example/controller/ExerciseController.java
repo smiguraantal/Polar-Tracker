@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/polar")
@@ -52,5 +53,20 @@ public class ExerciseController {
     @GetMapping("/total-duration")
     public String getTotalDuration() {
         return exerciseService.getTotalDuration();
+    }
+
+    @GetMapping("/total-duration/sport/{sport}")
+    public String getTotalDurationBySport(@PathVariable("sport") String sport) {
+        return exerciseService.getTotalDurationBySport(sport);
+    }
+
+    @GetMapping("/total-duration/grouped")
+    public Map<String, String> getTotalDurationGroupedBySport() {
+        return exerciseService.getTotalDurationGroupedBySport();
+    }
+
+    @GetMapping("/average-duration/grouped")
+    public Map<String, String> getAverageDurationBySport() {
+        return exerciseService.avgDurationGroupedBySport();
     }
 }
