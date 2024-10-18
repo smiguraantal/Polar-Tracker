@@ -17,8 +17,10 @@ import org.example.dto.HeartRateZoneDto;
 import org.example.dto.RoutePointDto;
 import org.example.dto.SampleDto;
 import org.example.dto.response.ExerciseSummaryResponse;
+import org.example.dto.response.FormattedExerciseSummaryResponse;
 import org.example.repository.ExerciseRepository;
 import org.example.util.DurationConverter;
+import org.example.util.ExerciseSummaryFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -48,6 +50,9 @@ public class ExerciseService {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private ExerciseSummaryFormatter formatter;
 
     public ExerciseDto findById(Long id) {
         Exercise exercise = exerciseRepository.findById(id)
@@ -146,8 +151,13 @@ public class ExerciseService {
         return summaries;
     }
 
-    public Long getTotalDuration() {
-        return exerciseRepository.sumDuration();
+    public List<FormattedExerciseSummaryResponse> getFormattedExerciseSummaries() {
+        List<ExerciseSummaryResponse> exerciseSummaries = getExerciseSummaries();
+        return formatter.formatSummaries(exerciseSummaries);
+    }
+
+    public String getTotalDuration() {
+        return DurationConverter.formatDuration(exerciseRepository.sumDuration());
     }
 
     private ExerciseDto convertToDto(Exercise exercise) {
@@ -174,22 +184,6 @@ public class ExerciseService {
                 .build();
     }
 
-    private String formatDuration2(Duration duration) {
-        long totalSeconds = duration.getSeconds();
-        long milliseconds = duration.toMillisPart();
-        long totalMillis = totalSeconds * 1000 + milliseconds;
-
-        return String.format("PT%d.%03dS", totalMillis / 1000, totalMillis % 1000);
-    }
-
-    private String formatDuration(Duration duration) {
-        long hours = duration.toHours();
-        long minutes = duration.toMinutes() % 60;
-        long seconds = duration.getSeconds() % 60;
-
-        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
-    }
-
     private HeartRateDto convertToHeartRateDto(int average, int maximum) {
         HeartRateDto heartRateDto = new HeartRateDto();
         heartRateDto.setAverage(average);
@@ -203,7 +197,7 @@ public class ExerciseService {
                         .index(zone.getIndex())
                         .lowerLimit(zone.getLowerLimit())
                         .upperLimit(zone.getUpperLimit())
-                        .inZone(zone.getInZone())
+                        .inZone(DurationConverter.millisToIso(zone.getInZone()))
                         .build())
                 .collect(Collectors.toList());
     }
@@ -213,7 +207,7 @@ public class ExerciseService {
                 .map(point -> RoutePointDto.builder()
                         .latitude(point.getLatitude())
                         .longitude(point.getLongitude())
-                        .time(formatDuration(point.getTime()))
+                        .time(DurationConverter.millisToIso(point.getTime()))
                         .satellites(point.getSatellites())
                         .fix(point.getFix())
                         .build())
@@ -260,7 +254,7 @@ public class ExerciseService {
                         .index(dto.getIndex())
                         .lowerLimit(dto.getLowerLimit())
                         .upperLimit(dto.getUpperLimit())
-                        .inZone(dto.getInZone())
+                        .inZone(DurationConverter.isoToMillis(dto.getInZone()))
                         .exercise(exercise)
                         .build())
                 .collect(Collectors.toList());
@@ -268,18 +262,14 @@ public class ExerciseService {
 
     private List<RoutePoint> convertToRoutePoints(List<RoutePointDto> dtoList, Exercise exercise) {
         return dtoList.stream()
-                .map(dto -> {
-                    Duration time = Duration.parse(dto.getTime());
-
-                    return RoutePoint.builder()
-                            .exercise(exercise)
-                            .latitude(dto.getLatitude())
-                            .longitude(dto.getLongitude())
-                            .time(time)
-                            .satellites(dto.getSatellites())
-                            .fix(dto.getFix())
-                            .build();
-                })
+                .map(dto -> RoutePoint.builder()
+                        .exercise(exercise)
+                        .latitude(dto.getLatitude())
+                        .longitude(dto.getLongitude())
+                        .time(DurationConverter.isoToMillis(dto.getTime()))
+                        .satellites(dto.getSatellites())
+                        .fix(dto.getFix())
+                        .build())
                 .collect(Collectors.toList());
     }
 

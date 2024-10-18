@@ -13,8 +13,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Duration;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -39,7 +37,7 @@ public class RoutePoint {
     private Double longitude;
 
     @Column(name = "time", nullable = false)
-    private Duration time;
+    private Long time;
 
     @Column(name = "satellites", nullable = false)
     private Integer satellites;

@@ -14,8 +14,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Duration;
-
 @Data
 @Entity
 @Builder
@@ -39,7 +37,7 @@ public class HeartRateZone {
     private Integer upperLimit;
 
     @Column(name = "in_zone", nullable = false)
-    private Duration inZone;
+    private Long inZone;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exercise_id", nullable = false)
