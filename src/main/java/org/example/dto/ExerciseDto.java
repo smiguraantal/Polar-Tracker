@@ -42,7 +42,8 @@ public class ExerciseDto {
     private Integer startTimeUtcOffset;
 
     @JsonProperty("duration")
-    private Long duration;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private String duration;
 
     @JsonProperty("distance")
     private Double distance;
@@ -78,13 +79,4 @@ public class ExerciseDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("samples")
     private List<SampleDto> samples;
-
-    public long getDurationInMillis() {
-        return duration;
-    }
-
-    public String getDuration() {
-        Duration durationObj = Duration.ofMillis(duration);
-        return durationObj.toString();
-    }
 }

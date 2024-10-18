@@ -18,6 +18,7 @@ import org.example.dto.RoutePointDto;
 import org.example.dto.SampleDto;
 import org.example.dto.response.ExerciseSummaryResponse;
 import org.example.repository.ExerciseRepository;
+import org.example.util.DurationConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -133,16 +134,10 @@ public class ExerciseService {
         List<ExerciseSummaryResponse> summaries = new ArrayList<>();
 
         for (Exercise exercise : exercises) {
-            long durationInMillis = exercise.getDuration();
-            long seconds = durationInMillis / 1000;
-            long millis = durationInMillis % 1000;
-
-            String isoDuration = millis == 0 ? String.format("PT%dS", seconds) : String.format("PT%d.%03dS", seconds, millis);
-
             ExerciseSummaryResponse summary = new ExerciseSummaryResponse();
             summary.setDate(exercise.getStartTime());
             summary.setSport(exercise.getSport());
-            summary.setDuration(isoDuration);
+            summary.setDuration(DurationConverter.millisToIso(exercise.getDuration()));
             summary.setDistance(exercise.getDistance());
             summary.setAverageHeartRate(exercise.getAverageHeartRate());
             summaries.add(summary);
@@ -164,7 +159,7 @@ public class ExerciseService {
                 .deviceId(exercise.getDeviceId())
                 .startTime(exercise.getStartTime())
                 .startTimeUtcOffset(exercise.getStartTimeUtcOffset())
-                .duration(exercise.getDuration())
+                .duration(DurationConverter.millisToIso(exercise.getDuration()))
                 .distance(exercise.getDistance())
                 .heartRate(convertToHeartRateDto(exercise.getAverageHeartRate(), exercise.getMaxHeartRate()))
                 .trainingLoad(exercise.getTrainingLoad())
@@ -246,7 +241,7 @@ public class ExerciseService {
                 .deviceId(dto.getDeviceId())
                 .startTime(dto.getStartTime())
                 .startTimeUtcOffset(dto.getStartTimeUtcOffset())
-                .duration(dto.getDurationInMillis())
+                .duration(DurationConverter.isoToMillis(dto.getDuration()))
                 .distance(dto.getDistance())
                 .averageHeartRate(dto.getHeartRate().getAverage())
                 .maxHeartRate(dto.getHeartRate().getMaximum())

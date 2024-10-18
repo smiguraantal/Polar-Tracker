@@ -21,6 +21,18 @@ public class DurationConverter {
         long minutes = duration.toMinutes() % 60;
         long seconds = duration.getSeconds() % 60;
 
-        return String.format("%d hours %d minutes %d seconds", hours, minutes, seconds);
+        StringBuilder formattedDuration = new StringBuilder();
+
+        if (hours > 0) {
+            formattedDuration.append(hours).append(hours == 1 ? " hour " : " hours ");
+        }
+        if (minutes > 0) {
+            formattedDuration.append(minutes).append(minutes == 1 ? " minute " : " minutes ");
+        }
+        if (seconds > 0 || formattedDuration.isEmpty()) {
+            formattedDuration.append(seconds).append(seconds == 1 ? " second" : " seconds");
+        }
+
+        return formattedDuration.toString().trim();
     }
 }

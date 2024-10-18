@@ -19,8 +19,8 @@ public class ExerciseSummaryResponse {
     private Double distance;
     private Integer averageHeartRate;
 
-    public long convertISOToMillis(String isoDuration) {
-        Duration duration = Duration.parse(isoDuration);
-        return duration.toMillis();
-    }
+//    public long convertISOToMillis(String isoDuration) {
+//        Duration duration = Duration.parse(isoDuration);
+//        return duration.toMillis();
+//    }
 }

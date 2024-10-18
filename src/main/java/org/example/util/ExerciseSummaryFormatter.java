@@ -24,7 +24,8 @@ public class ExerciseSummaryFormatter {
         return FormattedExerciseSummaryResponse.builder()
                 .date(formatDate(response.getDate().toString()))
                 .sport(response.getSport())
-                .duration(formatDuration(response.convertISOToMillis(response.getDuration())))  // Long duration millis
+//                .duration(formatDuration(response.convertISOToMillis(response.getDuration())))  // Long duration millis
+                .duration(DurationConverter.millisToFormatted(response.getDuration()))
                 .distance(formatDistance(response.getDistance()))
                 .averageHeartRate(formatHeartRate(response.getAverageHeartRate()))
                 .build();
