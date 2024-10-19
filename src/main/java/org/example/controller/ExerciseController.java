@@ -20,7 +20,7 @@ public class ExerciseController {
     @Autowired
     private ExerciseService exerciseService;
 
-    @GetMapping("/save-exercises")
+    @GetMapping("/exercises/save-exercises")
     public void saveExercises() {
         exerciseService.fetchAndSaveExercises();
     }
@@ -30,43 +30,64 @@ public class ExerciseController {
         return exerciseService.findById(id);
     }
 
-    @GetMapping("/exercise-summaries")
+    @GetMapping("/exercises/exercise-summaries")
     public List<ExerciseSummaryResponse> getExerciseSummaries() {
         return exerciseService.getExerciseSummaries();
     }
 
-    @GetMapping("/formatted-exercise-summaries")
+    @GetMapping("/exercises/formatted-exercise-summaries")
     public List<FormattedExerciseSummaryResponse> getFormattedExerciseSummaries() {
         return exerciseService.getFormattedExerciseSummaries();
     }
 
-    @GetMapping("/longest-distance")
+    @GetMapping("/exercises/longest-distance")
     public List<ExerciseSummaryResponse> getLongestDistanceExercise() {
         return exerciseService.getLongestDistanceExercise();
     }
 
-    @GetMapping("/highest-average-heart-rate")
+    @GetMapping("/exercises/highest-average-heart-rate")
     public List<ExerciseSummaryResponse> getHighestAverageHeartRateExercise() {
         return exerciseService.getHighestAverageHeartRateExercise();
     }
 
-    @GetMapping("/total-duration")
+    @GetMapping("/exercises/total-duration")
     public String getTotalDuration() {
         return exerciseService.getTotalDuration();
     }
 
-    @GetMapping("/total-duration/sport/{sport}")
+    @GetMapping("/exercises/total-duration/sport/{sport}")
     public String getTotalDurationBySport(@PathVariable("sport") String sport) {
         return exerciseService.getTotalDurationBySport(sport);
     }
 
-    @GetMapping("/total-duration/grouped")
+    @GetMapping("/exercises/total-duration/grouped")
     public Map<String, String> getTotalDurationGroupedBySport() {
         return exerciseService.getTotalDurationGroupedBySport();
     }
 
-    @GetMapping("/average-duration/grouped")
+    @GetMapping("/exercises/average-duration/grouped")
     public Map<String, String> getAverageDurationBySport() {
         return exerciseService.avgDurationGroupedBySport();
     }
+
+    @GetMapping("/exercises/grouped-by-year-month")
+    public Map<Integer, Map<String, List<ExerciseSummaryResponse>>> getExercisesGroupedByYearAndMonth() {
+        return exerciseService.getExercisesGroupedByYearAndMonth();
+    }
+
+    @GetMapping("/exercises/formatted-grouped-by-year-month")
+    public Map<Integer, Map<String, List<FormattedExerciseSummaryResponse>>> getFormattedExercisesGroupedByYearAndMonth() {
+        return exerciseService.getFormattedExercisesGroupedByYearAndMonth();
+    }
+
+    @GetMapping("/exercises/total-distance-by-sport-year-month")
+    public Map<Integer, Map<String, Map<String, Double>>> getTotalDistanceGroupedBySportYearAndMonth() {
+        return exerciseService.getTotalDistanceGroupedBySportYearAndMonth();
+    }
+
+    @GetMapping("/exercises/formatted-total-distance-by-sport-year-month")
+    public Map<Integer, Map<String, Map<String, String>>> getFormattedTotalDistanceGroupedBySportYearAndMonth() {
+        return exerciseService.getFormattedTotalDistanceGroupedBySportYearAndMonth();
+    }
+
 }

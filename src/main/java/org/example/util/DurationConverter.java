@@ -24,6 +24,14 @@ public class DurationConverter {
         return formatTimeComponents(hours, minutes, seconds);
     }
 
+    public static String millisToFormatted(long durationMillis) {
+        long hours = durationMillis / 1000 / 3600;
+        long minutes = (durationMillis / 1000 / 60) % 60;
+        long seconds = (durationMillis / 1000) % 60;
+
+        return formatTimeComponents(hours, minutes, seconds);
+    }
+
     public static String formatDuration(long durationMillis) {
         long hours = durationMillis / 1000 / 3600;
         long minutes = (durationMillis / 1000 / 60) % 60;

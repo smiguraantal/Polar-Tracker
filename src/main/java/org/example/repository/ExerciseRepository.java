@@ -25,4 +25,8 @@ public interface ExerciseRepository extends JpaRepository <Exercise, Long>{
 
     @Query("SELECT e.sport, AVG(e.duration) FROM Exercise e GROUP BY e.sport")
     List<Object[]> avgDurationGroupedBySport();
+
+    @Query("SELECT e FROM Exercise e ORDER BY YEAR(e.startTime), MONTH(e.startTime), DAY(e.startTime)")
+    List<Exercise> findAllExercisesOrderedByDate();
+
 }

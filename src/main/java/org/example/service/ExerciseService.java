@@ -19,17 +19,21 @@ import org.example.dto.SampleDto;
 import org.example.dto.response.ExerciseSummaryResponse;
 import org.example.dto.response.FormattedExerciseSummaryResponse;
 import org.example.repository.ExerciseRepository;
+import org.example.util.DistanceFormatter;
 import org.example.util.DurationConverter;
 import org.example.util.ExerciseSummaryFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -55,6 +59,9 @@ public class ExerciseService {
     @Autowired
     private ExerciseSummaryFormatter formatter;
 
+    @Autowired
+    private DistanceFormatter distanceFormatter;
+
     public void fetchAndSaveExercises() {
         try {
             String responseBody = restTemplate.getForObject(EXERCISES_URL + "?zones=true&route=true&samples=true", String.class);
@@ -62,7 +69,8 @@ public class ExerciseService {
                 throw new RuntimeException("API response is null");
             }
 
-            List<ExerciseDto> exerciseDtos = objectMapper.readValue(responseBody, new TypeReference<>() {});
+            List<ExerciseDto> exerciseDtos = objectMapper.readValue(responseBody, new TypeReference<>() {
+            });
 
             List<String> existingExerciseIds = exerciseRepository.findAllExerciseIds();
 
@@ -120,12 +128,7 @@ public class ExerciseService {
         List<ExerciseSummaryResponse> summaries = new ArrayList<>();
 
         for (Exercise exercise : exercises) {
-            ExerciseSummaryResponse summary = new ExerciseSummaryResponse();
-            summary.setDate(exercise.getStartTime());
-            summary.setSport(exercise.getSport());
-            summary.setDuration(DurationConverter.millisToIso(exercise.getDuration()));
-            summary.setDistance(exercise.getDistance());
-            summary.setAverageHeartRate(exercise.getAverageHeartRate());
+            ExerciseSummaryResponse summary = convertToExerciseSummaryResponse(exercise);
             summaries.add(summary);
         }
 
@@ -193,6 +196,89 @@ public class ExerciseService {
         return avgDurations;
     }
 
+    public Map<Integer, Map<String, List<ExerciseSummaryResponse>>> getExercisesGroupedByYearAndMonth() {
+        List<Exercise> exercises = exerciseRepository.findAllExercisesOrderedByDate();
+
+        List<ExerciseSummaryResponse> exerciseSummaries = exercises.stream()
+                .map(this::convertToExerciseSummaryResponse)
+                .toList();
+
+        return exerciseSummaries.stream()
+                .collect(Collectors.groupingBy(
+                        exercise -> exercise.getDate().getYear(),
+                        Collectors.groupingBy(
+                                exercise -> exercise.getDate().getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH),
+                                LinkedHashMap::new,
+                                Collectors.toList()
+                        )
+                ));
+    }
+
+    public Map<Integer, Map<String, List<FormattedExerciseSummaryResponse>>> getFormattedExercisesGroupedByYearAndMonth() {
+
+        Map<Integer, Map<String, List<ExerciseSummaryResponse>>> exercisesGroupedByYearAndMonth = getExercisesGroupedByYearAndMonth();
+
+        return exercisesGroupedByYearAndMonth.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        yearEntry -> yearEntry.getValue().entrySet().stream()
+                                .collect(Collectors.toMap(
+                                        Map.Entry::getKey,
+                                        monthEntry -> formatter.formatSummaries(monthEntry.getValue()),
+                                        (oldValue, newValue) -> oldValue,
+                                        LinkedHashMap::new
+                                )),
+                        (oldValue, newValue) -> oldValue,
+                        LinkedHashMap::new
+                ));
+    }
+
+    public Map<Integer, Map<String, Map<String, Double>>> getTotalDistanceGroupedBySportYearAndMonth() {
+        List<Exercise> exercises = exerciseRepository.findAllExercisesOrderedByDate();
+
+        return exercises.stream()
+                .collect(Collectors.groupingBy(
+                        exercise -> exercise.getStartTime().getYear(),
+                        Collectors.groupingBy(
+                                exercise -> exercise.getStartTime().getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH),
+                                Collectors.groupingBy(
+                                        Exercise::getSport,
+                                        Collectors.summingDouble(Exercise::getDistance)
+                                )
+                        )
+                ));
+    }
+
+    public Map<Integer, Map<String, Map<String, String>>> getFormattedTotalDistanceGroupedBySportYearAndMonth() {
+        Map<Integer, Map<String, Map<String, Double>>> rawDistanceData = getTotalDistanceGroupedBySportYearAndMonth();
+
+        return rawDistanceData.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        yearEntry -> yearEntry.getValue().entrySet().stream()
+                                .collect(Collectors.toMap(
+                                        Map.Entry::getKey,
+                                        monthEntry -> monthEntry.getValue().entrySet().stream()
+                                                .collect(Collectors.toMap(
+                                                        Map.Entry::getKey,
+                                                        sportEntry -> distanceFormatter.formatDistance(sportEntry.getValue())
+                                                ))
+                                ))
+                ));
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -239,6 +325,16 @@ public class ExerciseService {
                 .heartRateZones(convertToHeartRateZoneDtos(exercise.getHeartRateZones()))
                 .route(convertToRoutePointDtos(exercise.getRoutePoints()))
                 .samples(convertToSampleDtos(exercise.getHeartRateSamples()))
+                .build();
+    }
+
+    private ExerciseSummaryResponse convertToExerciseSummaryResponse(Exercise exercise) {
+        return ExerciseSummaryResponse.builder()
+                .date(exercise.getStartTime())
+                .sport(exercise.getSport())
+                .duration(DurationConverter.millisToIso(exercise.getDuration()))
+                .distance(exercise.getDistance())
+                .averageHeartRate(exercise.getAverageHeartRate())
                 .build();
     }
 
