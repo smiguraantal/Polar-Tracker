@@ -44,23 +44,29 @@ public class ExerciseService {
 
     private static final String EXERCISES_URL = "https://www.polaraccesslink.com/v3/exercises";
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
-    @Autowired
-    private GpxService gpxService;
+    private final GpxService gpxService;
 
-    @Autowired
-    private ExerciseRepository exerciseRepository;
+    private final ExerciseRepository exerciseRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ExerciseSummaryFormatter formatter;
 
-    @Autowired
-    private ExerciseSummaryFormatter formatter;
+    private final DistanceFormatter distanceFormatter;
 
-    @Autowired
-    private DistanceFormatter distanceFormatter;
+    private final DurationConverter durationConverter;
+
+    private final ObjectMapper objectMapper;
+
+    public ExerciseService(RestTemplate restTemplate, GpxService gpxService, ExerciseRepository exerciseRepository, ExerciseSummaryFormatter formatter, DistanceFormatter distanceFormatter, DurationConverter durationConverter, ObjectMapper objectMapper) {
+        this.restTemplate = restTemplate;
+        this.gpxService = gpxService;
+        this.exerciseRepository = exerciseRepository;
+        this.formatter = formatter;
+        this.distanceFormatter = distanceFormatter;
+        this.durationConverter = durationConverter;
+        this.objectMapper = objectMapper;
+    }
 
     public void fetchAndSaveExercises() {
         try {
@@ -161,11 +167,11 @@ public class ExerciseService {
     }
 
     public String getTotalDuration() {
-        return DurationConverter.formatDuration(exerciseRepository.sumDuration());
+        return durationConverter.formatDuration(exerciseRepository.sumDuration());
     }
 
     public String getTotalDurationBySport(String sport) {
-        return DurationConverter.formatDuration(exerciseRepository.sumDurationBySport(sport));
+        return durationConverter.formatDuration(exerciseRepository.sumDurationBySport(sport));
     }
 
     public Map<String, String> getTotalDurationGroupedBySport() {
@@ -175,7 +181,7 @@ public class ExerciseService {
         for (Object[] result : results) {
             String sport = (String) result[0];
             long durationMillis = (long) result[1];
-            String formattedDuration = DurationConverter.formatDuration(durationMillis);
+            String formattedDuration = durationConverter.formatDuration(durationMillis);
             durationsBySport.put(sport, formattedDuration);
         }
 
@@ -189,7 +195,7 @@ public class ExerciseService {
         for (Object[] result : results) {
             String sport = (String) result[0];
             long avgDurationMillis = ((Number) result[1]).longValue(); // Assuming duration is in milliseconds
-            String formattedDuration = DurationConverter.formatDuration(avgDurationMillis);
+            String formattedDuration = durationConverter.formatDuration(avgDurationMillis);
             avgDurations.put(sport, formattedDuration);
         }
 
@@ -291,7 +297,7 @@ public class ExerciseService {
                 .deviceId(dto.getDeviceId())
                 .startTime(dto.getStartTime())
                 .startTimeUtcOffset(dto.getStartTimeUtcOffset())
-                .duration(DurationConverter.isoToMillis(dto.getDuration()))
+                .duration(durationConverter.isoToMillis(dto.getDuration()))
                 .distance(dto.getDistance())
                 .averageHeartRate(dto.getHeartRate().getAverage())
                 .maxHeartRate(dto.getHeartRate().getMaximum())
@@ -313,7 +319,7 @@ public class ExerciseService {
                 .deviceId(exercise.getDeviceId())
                 .startTime(exercise.getStartTime())
                 .startTimeUtcOffset(exercise.getStartTimeUtcOffset())
-                .duration(DurationConverter.millisToIso(exercise.getDuration()))
+                .duration(durationConverter.millisToIso(exercise.getDuration()))
                 .distance(exercise.getDistance())
                 .heartRate(convertToHeartRateDto(exercise.getAverageHeartRate(), exercise.getMaxHeartRate()))
                 .trainingLoad(exercise.getTrainingLoad())
@@ -332,7 +338,7 @@ public class ExerciseService {
         return ExerciseSummaryResponse.builder()
                 .date(exercise.getStartTime())
                 .sport(exercise.getSport())
-                .duration(DurationConverter.millisToIso(exercise.getDuration()))
+                .duration(durationConverter.millisToIso(exercise.getDuration()))
                 .distance(exercise.getDistance())
                 .averageHeartRate(exercise.getAverageHeartRate())
                 .build();
@@ -345,7 +351,7 @@ public class ExerciseService {
                         .index(dto.getIndex())
                         .lowerLimit(dto.getLowerLimit())
                         .upperLimit(dto.getUpperLimit())
-                        .inZone(DurationConverter.isoToMillis(dto.getInZone()))
+                        .inZone(durationConverter.isoToMillis(dto.getInZone()))
                         .exercise(exercise)
                         .build())
                 .collect(Collectors.toList());
@@ -357,7 +363,7 @@ public class ExerciseService {
                         .index(zone.getIndex())
                         .lowerLimit(zone.getLowerLimit())
                         .upperLimit(zone.getUpperLimit())
-                        .inZone(DurationConverter.millisToIso(zone.getInZone()))
+                        .inZone(durationConverter.millisToIso(zone.getInZone()))
                         .build())
                 .collect(Collectors.toList());
     }
@@ -369,7 +375,7 @@ public class ExerciseService {
                         .exercise(exercise)
                         .latitude(dto.getLatitude())
                         .longitude(dto.getLongitude())
-                        .time(DurationConverter.isoToMillis(dto.getTime()))
+                        .time(durationConverter.isoToMillis(dto.getTime()))
                         .satellites(dto.getSatellites())
                         .fix(dto.getFix())
                         .build())
@@ -381,7 +387,7 @@ public class ExerciseService {
                 .map(point -> RoutePointDto.builder()
                         .latitude(point.getLatitude())
                         .longitude(point.getLongitude())
-                        .time(DurationConverter.millisToIso(point.getTime()))
+                        .time(durationConverter.millisToIso(point.getTime()))
                         .satellites(point.getSatellites())
                         .fix(point.getFix())
                         .build())

@@ -2,19 +2,22 @@ package org.example.util;
 
 import java.time.Duration;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class DurationConverter {
 
-    public static long isoToMillis(String isoDuration) {
+    public long isoToMillis(String isoDuration) {
         Duration duration = Duration.parse(isoDuration);
         return duration.toMillis();
     }
 
-    public static String millisToIso(long durationMillis) {
+    public String millisToIso(long durationMillis) {
         Duration duration = Duration.ofMillis(durationMillis);
         return duration.toString();
     }
 
-    public static String millisToFormatted(String isoDuration) {
+    public String millisToFormatted(String isoDuration) {
         Duration duration = Duration.parse(isoDuration);
 
         long hours = duration.toHours();
@@ -24,7 +27,7 @@ public class DurationConverter {
         return formatTimeComponents(hours, minutes, seconds);
     }
 
-    public static String millisToFormatted(long durationMillis) {
+    public String millisToFormatted(long durationMillis) {
         long hours = durationMillis / 1000 / 3600;
         long minutes = (durationMillis / 1000 / 60) % 60;
         long seconds = (durationMillis / 1000) % 60;
@@ -32,7 +35,7 @@ public class DurationConverter {
         return formatTimeComponents(hours, minutes, seconds);
     }
 
-    public static String formatDuration(long durationMillis) {
+    public String formatDuration(long durationMillis) {
         long hours = durationMillis / 1000 / 3600;
         long minutes = (durationMillis / 1000 / 60) % 60;
         long seconds = (durationMillis / 1000) % 60;
@@ -55,6 +58,4 @@ public class DurationConverter {
 
         return formattedDuration.toString().trim();
     }
-
-
 }
