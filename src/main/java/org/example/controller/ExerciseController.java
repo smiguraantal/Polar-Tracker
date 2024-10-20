@@ -89,5 +89,4 @@ public class ExerciseController {
     public Map<Integer, Map<String, Map<String, String>>> getFormattedTotalDistanceGroupedBySportYearAndMonth() {
         return exerciseService.getFormattedTotalDistanceGroupedBySportYearAndMonth();
     }
-
 }

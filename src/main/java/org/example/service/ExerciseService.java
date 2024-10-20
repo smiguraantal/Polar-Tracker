@@ -15,7 +15,6 @@ import org.example.dto.ExerciseDto;
 import org.example.dto.HeartRateDto;
 import org.example.dto.HeartRateZoneDto;
 import org.example.dto.RoutePointDto;
-import org.example.dto.SampleDto;
 import org.example.dto.response.ExerciseSummaryResponse;
 import org.example.dto.response.FormattedExerciseSummaryResponse;
 import org.example.dto.sample.AltitudeSampleDto;
@@ -24,15 +23,14 @@ import org.example.dto.sample.HeartRateSampleDto;
 import org.example.dto.sample.SpeedSampleDto;
 import org.example.dto.sample.StepCountSampleDto;
 import org.example.repository.ExerciseRepository;
-import org.example.util.DistanceFormatter;
-import org.example.util.DurationConverter;
-import org.example.util.ExerciseSummaryFormatter;
+import org.example.util.formatter.DistanceFormatter;
+import org.example.util.converter.DurationConverter;
+import org.example.util.formatter.ExerciseSummaryFormatter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.format.TextStyle;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -103,7 +101,6 @@ public class ExerciseService {
                 List<HeartRateZone> heartRateZones = convertToHeartRateZones(detailedExerciseDto.getHeartRateZones(), exercise);
                 List<RoutePoint> routePoints = convertToRoutePoints(detailedExerciseDto.getRoute(), exercise);
 
-                // Fetch samples using the new getters
                 List<HeartRateSample> heartRateSamples = convertToHeartRateSamples(detailedExerciseDto.getHeartRateSamples(), exercise);
                 List<SpeedSample> speedSamples = convertToSpeedSamples(detailedExerciseDto.getSpeedSamples(), exercise);
                 List<StepCountSample> stepCountSamples = convertToStepCountSamples(detailedExerciseDto.getStepCountSamples(), exercise);
@@ -129,13 +126,11 @@ public class ExerciseService {
         }
     }
 
-
     public ExerciseDto findById(Long id) {
         Exercise exercise = exerciseRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Exercise not found"));
         return convertToExerciseDto(exercise);
     }
-
 
     public List<ExerciseSummaryResponse> getExerciseSummaries() {
         List<Exercise> exercises = exerciseRepository.findAll();
@@ -396,24 +391,11 @@ public class ExerciseService {
                 .collect(Collectors.toList());
     }
 
-
     private HeartRateDto convertToHeartRateDto(int average, int maximum) {
         HeartRateDto heartRateDto = new HeartRateDto();
         heartRateDto.setAverage(average);
         heartRateDto.setMaximum(maximum);
         return heartRateDto;
-    }
-
-    private List<SampleDto> convertToSampleDtos(List<HeartRateSample> heartRateSamples) {
-        return heartRateSamples.stream()
-                .map(sample -> {
-                    SampleDto sampleDto = new SampleDto();
-                    sampleDto.setSampleType(0);
-                    sampleDto.setRecordingRate(sample.getRecordingRate());
-                    sampleDto.setData(String.valueOf(sample.getHeartRateValue()));
-                    return sampleDto;
-                })
-                .collect(Collectors.toList());
     }
 
 
@@ -427,7 +409,6 @@ public class ExerciseService {
                 .collect(Collectors.toList());
     }
 
-
     private List<SpeedSample> convertToSpeedSamples(List<SpeedSampleDto> speedSampleDtos, Exercise exercise) {
         return speedSampleDtos.stream()
                 .map(dto -> SpeedSample.builder()
@@ -437,7 +418,6 @@ public class ExerciseService {
                         .build())
                 .collect(Collectors.toList());
     }
-
 
     private List<StepCountSample> convertToStepCountSamples(List<StepCountSampleDto> stepCountSampleDtos, Exercise exercise) {
         return stepCountSampleDtos.stream()

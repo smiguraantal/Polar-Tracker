@@ -1,7 +1,8 @@
-package org.example.util;
+package org.example.util.formatter;
 
 import org.example.dto.response.ExerciseSummaryResponse;
 import org.example.dto.response.FormattedExerciseSummaryResponse;
+import org.example.util.converter.DurationConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

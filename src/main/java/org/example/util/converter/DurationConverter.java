@@ -1,4 +1,4 @@
-package org.example.util;
+package org.example.util.converter;
 
 import java.time.Duration;
 

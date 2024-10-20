@@ -11,11 +11,14 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class GpxService {
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
-    @Autowired
-    private GpxRepository gpxRepository;
+    private final GpxRepository gpxRepository;
+
+    public GpxService(RestTemplate restTemplate, GpxRepository gpxRepository) {
+        this.restTemplate = restTemplate;
+        this.gpxRepository = gpxRepository;
+    }
 
     @Transactional
     public void fetchAndSaveGpxData(String exerciseId) {
