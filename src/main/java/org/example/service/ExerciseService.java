@@ -100,7 +100,9 @@ public class ExerciseService {
                 ExerciseDto detailedExerciseDto = objectMapper.readValue(exerciseDetailsJson, ExerciseDto.class);
                 Exercise exercise = convertToExercise(detailedExerciseDto);
 
-                // Szétválasztjuk a SampleDto mintákat a sample_type alapján
+                List<HeartRateZone> heartRateZones = convertToHeartRateZones(detailedExerciseDto.getHeartRateZones(), exercise);
+                List<RoutePoint> routePoints = convertToRoutePoints(detailedExerciseDto.getRoute(), exercise);
+
                 List<SampleDto> sampleDtos = detailedExerciseDto.getSamples();
 
                 List<HeartRateSample> heartRateSamples = convertToHeartRateSamples(sampleDtos, exercise);
@@ -109,6 +111,8 @@ public class ExerciseService {
                 List<AltitudeSample> altitudeSamples = convertToAltitudeSamples(sampleDtos, exercise);
                 List<DistanceSample> distanceSamples = convertToDistanceSamples(sampleDtos, exercise);
 
+                exercise.setHeartRateZones(heartRateZones);
+                exercise.setRoutePoints(routePoints);
                 exercise.setHeartRateSamples(heartRateSamples);
                 exercise.setSpeedSamples(speedSamples);
                 exercise.setStepCountSamples(stepCountSamples);
@@ -116,6 +120,8 @@ public class ExerciseService {
                 exercise.setDistanceSamples(distanceSamples);
 
                 exerciseRepository.save(exercise);
+
+                gpxService.fetchAndSaveGpxData(exerciseDto.getExerciseId());
             }
         } catch (Exception e) {
             e.printStackTrace();
