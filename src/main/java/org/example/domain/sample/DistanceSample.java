@@ -1,4 +1,4 @@
-package org.example.domain;
+package org.example.domain.sample;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,26 +13,27 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.domain.Exercise;
 
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Table(name = "step_count_sample")
-public class StepCountSample {
+@Table(name = "distance_samples")
+public class DistanceSample {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exercise_id")
-    private Exercise exercise;
+    @Column(name = "distance_value", nullable = false)
+    private Double distanceValue;
 
-    @Column(name = "step_count")
-    private Integer stepCount;
-
-    @Column(name = "recording_rate")
+    @Column(name = "recording_rate", nullable = false)
     private Integer recordingRate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "exercise_id", nullable = false)
+    private Exercise exercise;
 }

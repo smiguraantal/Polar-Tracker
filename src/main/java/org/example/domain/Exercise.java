@@ -12,6 +12,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.domain.sample.AltitudeSample;
+import org.example.domain.sample.DistanceSample;
+import org.example.domain.sample.HeartRateSample;
+import org.example.domain.sample.SpeedSample;
+import org.example.domain.sample.StepCountSample;
 
 import java.time.LocalDateTime;
 import java.util.List;

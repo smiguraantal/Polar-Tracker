@@ -1,4 +1,4 @@
-package org.example.domain;
+package org.example.domain.sample;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,26 +12,28 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.domain.Exercise;
 
-@Data
 @Entity
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "heart_rate_sample")
-public class HeartRateSample {
+@Table(name = "altitude_samples")
+public class AltitudeSample {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
+
+    @Column(name = "altitude_value")
+    private Double altitudeValue;
+
+    @Column(name = "recording_rate")
+    private Integer recordingRate;
 
     @ManyToOne
     @JoinColumn(name = "exercise_id", nullable = false)
     private Exercise exercise;
-
-    @Column(name = "recording_rate", nullable = false)
-    private Integer recordingRate;
-
-    @Column(name = "heart_rate_value", nullable = false)
-    private Integer heartRateValue;
 }
