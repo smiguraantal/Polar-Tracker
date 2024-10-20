@@ -15,6 +15,7 @@ public class GpxService {
 
     private final GpxRepository gpxRepository;
 
+    @Autowired
     public GpxService(RestTemplate restTemplate, GpxRepository gpxRepository) {
         this.restTemplate = restTemplate;
         this.gpxRepository = gpxRepository;
