@@ -7,6 +7,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.dto.sample.AltitudeSampleDto;
+import org.example.dto.sample.DistanceSampleDto;
+import org.example.dto.sample.HeartRateSampleDto;
+import org.example.dto.sample.SpeedSampleDto;
+import org.example.dto.sample.StepCountSampleDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -75,7 +80,18 @@ public class ExerciseDto {
     @JsonProperty("route")
     private List<RoutePointDto> route;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonProperty("samples")
-    private List<SampleDto> samples;
+    @JsonProperty("heart_rate_samples")
+    private List<HeartRateSampleDto> heartRateSamples;
+
+    @JsonProperty("speed_samples")
+    private List<SpeedSampleDto> speedSamples;
+
+    @JsonProperty("step_count_samples")
+    private List<StepCountSampleDto> stepCountSamples;
+
+    @JsonProperty("altitude_samples")
+    private List<AltitudeSampleDto> altitudeSamples;
+
+    @JsonProperty("distance_samples")
+    private List<DistanceSampleDto> distanceSamples;
 }

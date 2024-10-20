@@ -18,6 +18,11 @@ import org.example.dto.RoutePointDto;
 import org.example.dto.SampleDto;
 import org.example.dto.response.ExerciseSummaryResponse;
 import org.example.dto.response.FormattedExerciseSummaryResponse;
+import org.example.dto.sample.AltitudeSampleDto;
+import org.example.dto.sample.DistanceSampleDto;
+import org.example.dto.sample.HeartRateSampleDto;
+import org.example.dto.sample.SpeedSampleDto;
+import org.example.dto.sample.StepCountSampleDto;
 import org.example.repository.ExerciseRepository;
 import org.example.util.DistanceFormatter;
 import org.example.util.DurationConverter;
@@ -97,11 +102,13 @@ public class ExerciseService {
 
                 List<HeartRateZone> heartRateZones = convertToHeartRateZones(detailedExerciseDto.getHeartRateZones(), exercise);
                 List<RoutePoint> routePoints = convertToRoutePoints(detailedExerciseDto.getRoute(), exercise);
-                List<HeartRateSample> heartRateSamples = convertToHeartRateSamples(detailedExerciseDto.getSamples(), exercise);
-                List<SpeedSample> speedSamples = convertToSpeedSamples(detailedExerciseDto.getSamples(), exercise);
-                List<StepCountSample> stepCountSamples = convertToStepCountSamples(detailedExerciseDto.getSamples(), exercise);
-                List<AltitudeSample> altitudeSamples = convertToAltitudeSamples(detailedExerciseDto.getSamples(), exercise);
-                List<DistanceSample> distanceSamples = convertToDistanceSamples(detailedExerciseDto.getSamples(), exercise);
+
+                // Fetch samples using the new getters
+                List<HeartRateSample> heartRateSamples = convertToHeartRateSamples(detailedExerciseDto.getHeartRateSamples(), exercise);
+                List<SpeedSample> speedSamples = convertToSpeedSamples(detailedExerciseDto.getSpeedSamples(), exercise);
+                List<StepCountSample> stepCountSamples = convertToStepCountSamples(detailedExerciseDto.getStepCountSamples(), exercise);
+                List<AltitudeSample> altitudeSamples = convertToAltitudeSamples(detailedExerciseDto.getAltitudeSamples(), exercise);
+                List<DistanceSample> distanceSamples = convertToDistanceSamples(detailedExerciseDto.getDistanceSamples(), exercise);
 
                 exercise.setHeartRateZones(heartRateZones);
                 exercise.setRoutePoints(routePoints);
@@ -121,6 +128,7 @@ public class ExerciseService {
             throw new RuntimeException("Failed to fetch and save exercises", e);
         }
     }
+
 
     public ExerciseDto findById(Long id) {
         Exercise exercise = exerciseRepository.findById(id)
@@ -319,9 +327,14 @@ public class ExerciseService {
                 .runningIndex(exercise.getRunningIndex())
                 .heartRateZones(convertToHeartRateZoneDtos(exercise.getHeartRateZones()))
                 .route(convertToRoutePointDtos(exercise.getRoutePoints()))
-                .samples(convertToSampleDtos(exercise.getHeartRateSamples()))
+                .heartRateSamples(convertToHeartRateSampleDtos(exercise.getHeartRateSamples())) // New line for heart rate samples
+                .speedSamples(convertToSpeedSampleDtos(exercise.getSpeedSamples())) // New line for speed samples
+                .stepCountSamples(convertToStepCountSampleDtos(exercise.getStepCountSamples())) // New line for step count samples
+                .altitudeSamples(convertToAltitudeSampleDtos(exercise.getAltitudeSamples())) // New line for altitude samples
+                .distanceSamples(convertToDistanceSampleDtos(exercise.getDistanceSamples())) // New line for distance samples
                 .build();
     }
+
 
     private ExerciseSummaryResponse convertToExerciseSummaryResponse(Exercise exercise) {
         return ExerciseSummaryResponse.builder()
@@ -404,74 +417,103 @@ public class ExerciseService {
     }
 
 
-    private List<HeartRateSample> convertToHeartRateSamples(List<SampleDto> sampleDtos, Exercise exercise) {
-        return sampleDtos.stream()
-                .filter(sampleDto -> sampleDto.getSampleType() == 0)
-                .flatMap(sampleDto -> {
-                    String[] heartRateValues = sampleDto.getData().split(",");
-                    return Arrays.stream(heartRateValues)
-                            .map(Integer::valueOf)
-                            .map(heartRateValue -> HeartRateSample.builder()
-                                    .exercise(exercise)
-                                    .recordingRate(sampleDto.getRecordingRate())
-                                    .heartRateValue(heartRateValue)
-                                    .build());
-                })
+    private List<HeartRateSample> convertToHeartRateSamples(List<HeartRateSampleDto> heartRateSampleDtos, Exercise exercise) {
+        return heartRateSampleDtos.stream()
+                .map(dto -> HeartRateSample.builder()
+                        .exercise(exercise)
+                        .recordingRate(dto.getRecordingRate())
+                        .heartRateValue(dto.getHeartRateValue())
+                        .build())
                 .collect(Collectors.toList());
     }
 
-    private List<SpeedSample> convertToSpeedSamples(List<SampleDto> sampleDtos, Exercise exercise) {
-        return sampleDtos.stream()
-                .filter(dto -> dto.getSampleType() == 1)
-                .flatMap(dto -> {
-                    String[] speedValues = dto.getData().split(",");
-                    return Arrays.stream(speedValues)
-                            .map(speedValue -> SpeedSample.builder()
-                                    .speedValue(Double.parseDouble(speedValue))
-                                    .recordingRate(dto.getRecordingRate())
-                                    .exercise(exercise)
-                                    .build());
-                })
+
+    private List<SpeedSample> convertToSpeedSamples(List<SpeedSampleDto> speedSampleDtos, Exercise exercise) {
+        return speedSampleDtos.stream()
+                .map(dto -> SpeedSample.builder()
+                        .exercise(exercise)
+                        .speedValue(dto.getSpeedValue())
+                        .recordingRate(dto.getRecordingRate())
+                        .build())
                 .collect(Collectors.toList());
     }
 
-    private List<StepCountSample> convertToStepCountSamples(List<SampleDto> sampleDtos, Exercise exercise) {
-        return sampleDtos.stream()
-                .filter(sampleDto -> sampleDto.getSampleType() == 2)
-                .flatMap(sampleDto -> {
-                    String[] stepCounts = sampleDto.getData().split(",");
-                    return Arrays.stream(stepCounts)
-                            .map(stepCount -> StepCountSample.builder()
-                                    .exercise(exercise)
-                                    .stepCount(Integer.parseInt(stepCount))
-                                    .recordingRate(sampleDto.getRecordingRate())
-                                    .build());
-                })
+
+    private List<StepCountSample> convertToStepCountSamples(List<StepCountSampleDto> stepCountSampleDtos, Exercise exercise) {
+        return stepCountSampleDtos.stream()
+                .map(dto -> StepCountSample.builder()
+                        .exercise(exercise)
+                        .stepCount(dto.getStepCount())
+                        .recordingRate(dto.getRecordingRate())
+                        .build())
                 .collect(Collectors.toList());
     }
 
-    private List<AltitudeSample> convertToAltitudeSamples(List<SampleDto> sampleDtos, Exercise exercise) {
-        return sampleDtos.stream()
-                .filter(sampleDto -> sampleDto.getSampleType() == 3)
-                .flatMap(sampleDto -> Arrays.stream(sampleDto.getData().split(","))
-                        .map(altitude -> AltitudeSample.builder()
-                                .exercise(exercise)
-                                .altitudeValue(Double.parseDouble(altitude))
-                                .recordingRate(sampleDto.getRecordingRate())
-                                .build()))
+    private List<AltitudeSample> convertToAltitudeSamples(List<AltitudeSampleDto> altitudeSampleDtos, Exercise exercise) {
+        return altitudeSampleDtos.stream()
+                .map(dto -> AltitudeSample.builder()
+                        .exercise(exercise)
+                        .altitudeValue(dto.getAltitudeValue())
+                        .recordingRate(dto.getRecordingRate())
+                        .build())
                 .collect(Collectors.toList());
     }
 
-    private List<DistanceSample> convertToDistanceSamples(List<SampleDto> sampleDtos, Exercise exercise) {
-        return sampleDtos.stream()
-                .filter(sampleDto -> sampleDto.getSampleType() == 10)
-                .flatMap(sampleDto -> Arrays.stream(sampleDto.getData().split(","))
-                        .map(distance -> DistanceSample.builder()
-                                .exercise(exercise)
-                                .distanceValue(Double.parseDouble(distance))
-                                .recordingRate(sampleDto.getRecordingRate())
-                                .build())
-                )
+    private List<DistanceSample> convertToDistanceSamples(List<DistanceSampleDto> distanceSampleDtos, Exercise exercise) {
+        return distanceSampleDtos.stream()
+                .map(dto -> DistanceSample.builder()
+                        .exercise(exercise)
+                        .distanceValue(dto.getDistanceValue())
+                        .recordingRate(dto.getRecordingRate())
+                        .build())
                 .collect(Collectors.toList());
     }
+
+
+
+    private List<HeartRateSampleDto> convertToHeartRateSampleDtos(List<HeartRateSample> samples) {
+        return samples.stream()
+                .map(sample -> HeartRateSampleDto.builder()
+                        .recordingRate(sample.getRecordingRate())
+                        .heartRateValue(sample.getHeartRateValue())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private List<SpeedSampleDto> convertToSpeedSampleDtos(List<SpeedSample> speedSamples) {
+        return speedSamples.stream()
+                .map(sample -> SpeedSampleDto.builder()
+                        .recordingRate(sample.getRecordingRate())
+                        .speedValue(sample.getSpeedValue())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private List<StepCountSampleDto> convertToStepCountSampleDtos(List<StepCountSample> stepCountSamples) {
+        return stepCountSamples.stream()
+                .map(sample -> StepCountSampleDto.builder()
+                        .recordingRate(sample.getRecordingRate())
+                        .stepCount(sample.getStepCount())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private List<AltitudeSampleDto> convertToAltitudeSampleDtos(List<AltitudeSample> altitudeSamples) {
+        return altitudeSamples.stream()
+                .map(sample -> AltitudeSampleDto.builder()
+                        .recordingRate(sample.getRecordingRate())
+                        .altitudeValue(sample.getAltitudeValue())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private List<DistanceSampleDto> convertToDistanceSampleDtos(List<DistanceSample> distanceSamples) {
+        return distanceSamples.stream()
+                .map(sample -> DistanceSampleDto.builder()
+                        .recordingRate(sample.getRecordingRate())
+                        .distanceValue(sample.getDistanceValue())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
 }
