@@ -43,7 +43,7 @@ public class DurationConverter {
         return formatTimeComponents(hours, minutes, seconds);
     }
 
-    private static String formatTimeComponents(long hours, long minutes, long seconds) {
+    private String formatTimeComponents(long hours, long minutes, long seconds) {
         StringBuilder formattedDuration = new StringBuilder();
 
         if (hours > 0) {

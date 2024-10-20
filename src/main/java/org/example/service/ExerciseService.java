@@ -22,7 +22,6 @@ import org.example.repository.ExerciseRepository;
 import org.example.util.DistanceFormatter;
 import org.example.util.DurationConverter;
 import org.example.util.ExerciseSummaryFormatter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -129,6 +128,7 @@ public class ExerciseService {
         return convertToExerciseDto(exercise);
     }
 
+
     public List<ExerciseSummaryResponse> getExerciseSummaries() {
         List<Exercise> exercises = exerciseRepository.findAll();
         List<ExerciseSummaryResponse> summaries = new ArrayList<>();
@@ -194,7 +194,7 @@ public class ExerciseService {
 
         for (Object[] result : results) {
             String sport = (String) result[0];
-            long avgDurationMillis = ((Number) result[1]).longValue(); // Assuming duration is in milliseconds
+            long avgDurationMillis = ((Number) result[1]).longValue();
             String formattedDuration = durationConverter.formatDuration(avgDurationMillis);
             avgDurations.put(sport, formattedDuration);
         }
@@ -272,17 +272,6 @@ public class ExerciseService {
                                 ))
                 ));
     }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
