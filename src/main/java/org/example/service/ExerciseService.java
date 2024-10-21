@@ -3,6 +3,7 @@ package org.example.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.example.domain.sample.AltitudeSample;
 import org.example.domain.sample.DistanceSample;
 import org.example.domain.Exercise;
@@ -74,6 +75,7 @@ public class ExerciseService {
         this.objectMapper = objectMapper;
     }
 
+    @Transactional
     public void fetchAndSaveExercises() {
         try {
             String responseBody = restTemplate.getForObject(EXERCISES_URL + "?zones=true&route=true&samples=true", String.class);
@@ -121,7 +123,7 @@ public class ExerciseService {
 
                 exerciseRepository.save(exercise);
 
-                gpxService.fetchAndSaveGpxData(exerciseDto.getExerciseId());
+                gpxService.fetchAndSaveGpxData(exercise);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -134,6 +136,14 @@ public class ExerciseService {
                 .orElseThrow(() -> new EntityNotFoundException("Exercise not found"));
         return convertToExerciseDto(exercise);
     }
+
+    @Transactional
+    public void deleteExercise(Long id) {
+        Exercise exercise = exerciseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Exercise not found"));
+        exerciseRepository.delete(exercise);
+    }
+
 
     public List<ExerciseSummaryResponse> getExerciseSummaries() {
         List<Exercise> exercises = exerciseRepository.findAll();

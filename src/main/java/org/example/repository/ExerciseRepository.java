@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.OptionalDouble;
 
 @Repository
 public interface ExerciseRepository extends JpaRepository <Exercise, Long>{
@@ -28,4 +29,5 @@ public interface ExerciseRepository extends JpaRepository <Exercise, Long>{
 
     @Query("SELECT e FROM Exercise e ORDER BY YEAR(e.startTime), MONTH(e.startTime), DAY(e.startTime)")
     List<Exercise> findAllExercisesOrderedByDate();
+
 }

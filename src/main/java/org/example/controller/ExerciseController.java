@@ -5,6 +5,8 @@ import org.example.dto.response.ExerciseSummaryResponse;
 import org.example.dto.response.FormattedExerciseSummaryResponse;
 import org.example.service.ExerciseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +30,12 @@ public class ExerciseController {
     @GetMapping("/exercises/{id}")
     public ExerciseDto getExerciseById(@PathVariable("id") Long id) {
         return exerciseService.findById(id);
+    }
+
+    @DeleteMapping("/exercises/{id}")
+    public ResponseEntity<Void> deleteExercise(@PathVariable("id") Long id) {
+        exerciseService.deleteExercise(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/exercises/exercise-summaries")

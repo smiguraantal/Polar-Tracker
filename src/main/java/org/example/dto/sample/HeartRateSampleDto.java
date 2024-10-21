@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class HeartRateSampleDto {
 
-    @JsonProperty("recording_rate")
-    private Integer recordingRate;
-
     @JsonProperty("heart_rate_value")
     private Integer heartRateValue;
+
+    @JsonProperty("recording_rate")
+    private Integer recordingRate;
 }

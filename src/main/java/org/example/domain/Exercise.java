@@ -105,4 +105,7 @@ public class Exercise {
 
     @OneToMany(mappedBy = "exercise", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DistanceSample> distanceSamples;
+
+    @OneToMany(mappedBy = "exercise", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Gpx> gpxData;
 }
