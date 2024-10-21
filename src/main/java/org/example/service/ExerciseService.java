@@ -415,7 +415,7 @@ public class ExerciseService {
 
     private List<HeartRateSample> convertToHeartRateSamples(List<SampleDto> sampleDtos, Exercise exercise) {
         return sampleDtos.stream()
-                .filter(sampleDto -> sampleDto.getSampleType() == 0) // 1 jelöli a Heart Rate mintát
+                .filter(sampleDto -> sampleDto.getSampleType() == 0)
                 .flatMap(sampleDto -> Arrays.stream(sampleDto.getData().split(","))
                         .map(heartRate -> HeartRateSample.builder()
                                 .exercise(exercise)
@@ -427,7 +427,7 @@ public class ExerciseService {
 
     private List<SpeedSample> convertToSpeedSamples(List<SampleDto> sampleDtos, Exercise exercise) {
         return sampleDtos.stream()
-                .filter(sampleDto -> sampleDto.getSampleType() == 1) // 2 jelöli a Speed mintát
+                .filter(sampleDto -> sampleDto.getSampleType() == 1)
                 .flatMap(sampleDto -> Arrays.stream(sampleDto.getData().split(","))
                         .map(speed -> SpeedSample.builder()
                                 .exercise(exercise)
@@ -439,7 +439,7 @@ public class ExerciseService {
 
     private List<StepCountSample> convertToStepCountSamples(List<SampleDto> sampleDtos, Exercise exercise) {
         return sampleDtos.stream()
-                .filter(sampleDto -> sampleDto.getSampleType() == 2) // 3 jelöli a Step Count mintát
+                .filter(sampleDto -> sampleDto.getSampleType() == 2)
                 .flatMap(sampleDto -> Arrays.stream(sampleDto.getData().split(","))
                         .map(stepCount -> StepCountSample.builder()
                                 .exercise(exercise)
@@ -451,7 +451,7 @@ public class ExerciseService {
 
     private List<AltitudeSample> convertToAltitudeSamples(List<SampleDto> sampleDtos, Exercise exercise) {
         return sampleDtos.stream()
-                .filter(sampleDto -> sampleDto.getSampleType() == 3) // 4 jelöli az Altitude mintát
+                .filter(sampleDto -> sampleDto.getSampleType() == 3)
                 .flatMap(sampleDto -> Arrays.stream(sampleDto.getData().split(","))
                         .map(altitude -> AltitudeSample.builder()
                                 .exercise(exercise)
@@ -463,7 +463,7 @@ public class ExerciseService {
 
     private List<DistanceSample> convertToDistanceSamples(List<SampleDto> sampleDtos, Exercise exercise) {
         return sampleDtos.stream()
-                .filter(sampleDto -> sampleDto.getSampleType() == 10) // 10 jelöli a Distance mintát
+                .filter(sampleDto -> sampleDto.getSampleType() == 10)
                 .flatMap(sampleDto -> Arrays.stream(sampleDto.getData().split(","))
                         .map(distance -> DistanceSample.builder()
                                 .exercise(exercise)
