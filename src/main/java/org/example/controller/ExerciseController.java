@@ -3,8 +3,10 @@ package org.example.controller;
 import org.example.dto.ExerciseDto;
 import org.example.dto.response.ExerciseSummaryResponse;
 import org.example.dto.response.FormattedExerciseSummaryResponse;
+import org.example.service.EmailService;
 import org.example.service.ExerciseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,8 +21,23 @@ import java.util.Map;
 @RequestMapping("/api/polar")
 public class ExerciseController {
 
+    private final ExerciseService exerciseService;
+    private final EmailService emailService;
+
+    @Value("${spring.mail.username}")
+    private String toEmail;
+
     @Autowired
-    private ExerciseService exerciseService;
+    public ExerciseController(ExerciseService exerciseService, EmailService emailService) {
+        this.exerciseService = exerciseService;
+        this.emailService = emailService;
+    }
+
+    @GetMapping("/send-test-email")
+    public String sendTestEmail() {
+        emailService.sendEmail(toEmail, "Test Email", "This is a test email from Polar Tracker.");
+        return "Email sent successfully!";
+    }
 
     @GetMapping("/exercises/save-exercises")
     public void saveExercises() {
