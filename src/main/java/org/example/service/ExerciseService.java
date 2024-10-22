@@ -45,6 +45,12 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
+import static org.example.constant.SampleTypeConstants.ALTITUDE_SAMPLE;
+import static org.example.constant.SampleTypeConstants.DISTANCE_SAMPLE;
+import static org.example.constant.SampleTypeConstants.HEART_RATE_SAMPLE;
+import static org.example.constant.SampleTypeConstants.SPEED_SAMPLE;
+import static org.example.constant.SampleTypeConstants.STEP_COUNT_SAMPLE;
+
 @Service
 public class ExerciseService {
 
@@ -415,7 +421,7 @@ public class ExerciseService {
 
     private List<HeartRateSample> convertToHeartRateSamples(List<SampleDto> sampleDtos, Exercise exercise) {
         return sampleDtos.stream()
-                .filter(sampleDto -> sampleDto.getSampleType() == 0)
+                .filter(sampleDto -> sampleDto.getSampleType() == HEART_RATE_SAMPLE)
                 .flatMap(sampleDto -> Arrays.stream(sampleDto.getData().split(","))
                         .map(heartRate -> HeartRateSample.builder()
                                 .exercise(exercise)
@@ -427,7 +433,7 @@ public class ExerciseService {
 
     private List<SpeedSample> convertToSpeedSamples(List<SampleDto> sampleDtos, Exercise exercise) {
         return sampleDtos.stream()
-                .filter(sampleDto -> sampleDto.getSampleType() == 1)
+                .filter(sampleDto -> sampleDto.getSampleType() == SPEED_SAMPLE)
                 .flatMap(sampleDto -> Arrays.stream(sampleDto.getData().split(","))
                         .map(speed -> SpeedSample.builder()
                                 .exercise(exercise)
@@ -439,7 +445,7 @@ public class ExerciseService {
 
     private List<StepCountSample> convertToStepCountSamples(List<SampleDto> sampleDtos, Exercise exercise) {
         return sampleDtos.stream()
-                .filter(sampleDto -> sampleDto.getSampleType() == 2)
+                .filter(sampleDto -> sampleDto.getSampleType() == STEP_COUNT_SAMPLE)
                 .flatMap(sampleDto -> Arrays.stream(sampleDto.getData().split(","))
                         .map(stepCount -> StepCountSample.builder()
                                 .exercise(exercise)
@@ -451,7 +457,7 @@ public class ExerciseService {
 
     private List<AltitudeSample> convertToAltitudeSamples(List<SampleDto> sampleDtos, Exercise exercise) {
         return sampleDtos.stream()
-                .filter(sampleDto -> sampleDto.getSampleType() == 3)
+                .filter(sampleDto -> sampleDto.getSampleType() == ALTITUDE_SAMPLE)
                 .flatMap(sampleDto -> Arrays.stream(sampleDto.getData().split(","))
                         .map(altitude -> AltitudeSample.builder()
                                 .exercise(exercise)
@@ -463,7 +469,7 @@ public class ExerciseService {
 
     private List<DistanceSample> convertToDistanceSamples(List<SampleDto> sampleDtos, Exercise exercise) {
         return sampleDtos.stream()
-                .filter(sampleDto -> sampleDto.getSampleType() == 10)
+                .filter(sampleDto -> sampleDto.getSampleType() == DISTANCE_SAMPLE)
                 .flatMap(sampleDto -> Arrays.stream(sampleDto.getData().split(","))
                         .map(distance -> DistanceSample.builder()
                                 .exercise(exercise)
