@@ -25,9 +25,6 @@ public class ExerciseController {
     private final ExerciseService exerciseService;
     private final EmailService emailService;
 
-    @Value("${spring.mail.username}")
-    private String toEmail;
-
     @Autowired
     public ExerciseController(ExerciseService exerciseService, EmailService emailService) {
         this.exerciseService = exerciseService;

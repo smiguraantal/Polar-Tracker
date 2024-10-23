@@ -1,9 +1,11 @@
 package org.example.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.example.domain.User;
 import org.example.domain.sample.AltitudeSample;
 import org.example.domain.sample.DistanceSample;
 import org.example.domain.Exercise;
@@ -25,6 +27,7 @@ import org.example.dto.sample.SampleDto;
 import org.example.dto.sample.SpeedSampleDto;
 import org.example.dto.sample.StepCountSampleDto;
 import org.example.repository.ExerciseRepository;
+import org.example.repository.UserRepository;
 import org.example.util.formatter.DistanceFormatter;
 import org.example.util.converter.DurationConverter;
 import org.example.util.formatter.ExerciseSummaryFormatter;
@@ -41,6 +44,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
@@ -58,17 +62,22 @@ public class ExerciseService {
 
     private final RestTemplate restTemplate;
     private final GpxService gpxService;
+    private final EmailService emailService;
     private final ExerciseRepository exerciseRepository;
+    private final UserRepository userRepository;
+
     private final ExerciseSummaryFormatter formatter;
     private final DistanceFormatter distanceFormatter;
     private final DurationConverter durationConverter;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public ExerciseService(RestTemplate restTemplate, GpxService gpxService, ExerciseRepository exerciseRepository, ExerciseSummaryFormatter formatter, DistanceFormatter distanceFormatter, DurationConverter durationConverter, ObjectMapper objectMapper) {
+    public ExerciseService(RestTemplate restTemplate, GpxService gpxService, EmailService emailService, ExerciseRepository exerciseRepository, UserRepository userRepository, ExerciseSummaryFormatter formatter, DistanceFormatter distanceFormatter, DurationConverter durationConverter, ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
         this.gpxService = gpxService;
+        this.emailService = emailService;
         this.exerciseRepository = exerciseRepository;
+        this.userRepository = userRepository;
         this.formatter = formatter;
         this.distanceFormatter = distanceFormatter;
         this.durationConverter = durationConverter;
@@ -86,8 +95,12 @@ public class ExerciseService {
             List<ExerciseDto> exerciseDtos = objectMapper.readValue(responseBody, new TypeReference<>() {});
 
             List<String> existingExerciseIds = exerciseRepository.findAllExerciseIds();
+            List<Exercise> newlySavedExercises = new ArrayList<>();
 
             for (ExerciseDto exerciseDto : exerciseDtos) {
+                if (!"RUNNING".equals(exerciseDto.getSport()) && !"CYCLING".equals(exerciseDto.getSport())) {
+                    continue;
+                }
                 if (existingExerciseIds.contains(exerciseDto.getExerciseId())) {
                     continue;
                 }
@@ -104,9 +117,7 @@ public class ExerciseService {
 
                 List<HeartRateZone> heartRateZones = convertToHeartRateZones(detailedExerciseDto.getHeartRateZones(), exercise);
                 List<RoutePoint> routePoints = convertToRoutePoints(detailedExerciseDto.getRoute(), exercise);
-
                 List<SampleDto> sampleDtos = detailedExerciseDto.getSamples();
-
                 List<HeartRateSample> heartRateSamples = convertToHeartRateSamples(sampleDtos, exercise);
                 List<SpeedSample> speedSamples = convertToSpeedSamples(sampleDtos, exercise);
                 List<StepCountSample> stepCountSamples = convertToStepCountSamples(sampleDtos, exercise);
@@ -122,12 +133,35 @@ public class ExerciseService {
                 exercise.setDistanceSamples(distanceSamples);
 
                 exerciseRepository.save(exercise);
+                newlySavedExercises.add(exercise);
 
                 gpxService.fetchAndSaveGpxData(exercise);
             }
+
+            if (!newlySavedExercises.isEmpty()) {
+                sendNewExerciseSummaries(newlySavedExercises);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to fetch and save exercises", e);
+        }
+    }
+
+    private void sendNewExerciseSummaries(List<Exercise> newlySavedExercises) throws JsonProcessingException {
+        List<ExerciseSummaryResponse> exerciseSummaries = newlySavedExercises.stream()
+                .map(this::convertToExerciseSummaryResponse)
+                .collect(Collectors.toList());
+
+        List<FormattedExerciseSummaryResponse> formattedSummaries = formatter.formatSummaries(exerciseSummaries);
+
+        String emailBody = objectMapper.writeValueAsString(formattedSummaries);
+
+        Optional<User> userOptional = userRepository.findById(1L);
+        if (userOptional.isPresent()) {
+            String userEmail = userOptional.get().getEmail();
+
+            emailService.sendEmail(userEmail, "New Exercise Summaries", emailBody);
         }
     }
 
@@ -143,7 +177,6 @@ public class ExerciseService {
                 .orElseThrow(() -> new EntityNotFoundException("Exercise not found"));
         exerciseRepository.delete(exercise);
     }
-
 
     public List<ExerciseSummaryResponse> getExerciseSummaries() {
         List<Exercise> exercises = exerciseRepository.findAll();
