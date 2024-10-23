@@ -57,17 +57,11 @@ public class ExerciseService {
     private static final String EXERCISES_URL = "https://www.polaraccesslink.com/v3/exercises";
 
     private final RestTemplate restTemplate;
-
     private final GpxService gpxService;
-
     private final ExerciseRepository exerciseRepository;
-
     private final ExerciseSummaryFormatter formatter;
-
     private final DistanceFormatter distanceFormatter;
-
     private final DurationConverter durationConverter;
-
     private final ObjectMapper objectMapper;
 
     @Autowired

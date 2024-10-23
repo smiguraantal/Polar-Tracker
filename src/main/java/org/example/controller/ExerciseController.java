@@ -7,6 +7,7 @@ import org.example.service.EmailService;
 import org.example.service.ExerciseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,9 +35,14 @@ public class ExerciseController {
     }
 
     @GetMapping("/send-test-email")
-    public String sendTestEmail() {
-        emailService.sendEmail(toEmail, "Test Email", "This is a test email from Polar Tracker.");
-        return "Email sent successfully!";
+    public ResponseEntity<String> sendTestEmail() {
+        try {
+            emailService.sendTestEmail(1L);
+            return ResponseEntity.ok("Test email sent successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to send email: " + e.getMessage());
+        }
     }
 
     @GetMapping("/exercises/save-exercises")

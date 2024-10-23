@@ -16,7 +16,7 @@ import java.util.Collections;
 @Configuration
 public class AppConfig {
 
-    @Value("${POLAR_ACCESS_TOKEN}")
+    @Value("${polar.access.token}")
     private String polarAccessToken;
 
     @Bean
