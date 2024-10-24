@@ -12,7 +12,7 @@ With the data stored in the database, it enables custom queries and the creation
 You'll need to configure some environment variables to connect the application to the necessary services:
 
 - `POLAR_ACCESS_TOKEN` - Your Polar API access token.
-- `MAIL_USER` - The email address the application will use to send notifications.
+- `MAIL_USERNAME` - The email address the application will use to send notifications.
 - `MAIL_PASSWORD` - The password for the email account.
 - `DB_USERNAME` - The database username.
 - `DB_PASSWORD` - The database password.
