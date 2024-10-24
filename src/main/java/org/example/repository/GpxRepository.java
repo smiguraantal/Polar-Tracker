@@ -11,5 +11,4 @@ import java.util.Optional;
 public interface GpxRepository extends JpaRepository<Gpx, Long> {
 
     Optional<Gpx> findByExerciseId(@Param("exerciseId") Long exerciseId);
-
 }

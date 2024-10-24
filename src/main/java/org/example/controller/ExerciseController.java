@@ -3,11 +3,8 @@ package org.example.controller;
 import org.example.dto.ExerciseDto;
 import org.example.dto.response.ExerciseSummaryResponse;
 import org.example.dto.response.FormattedExerciseSummaryResponse;
-import org.example.service.EmailService;
 import org.example.service.ExerciseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,23 +20,10 @@ import java.util.Map;
 public class ExerciseController {
 
     private final ExerciseService exerciseService;
-    private final EmailService emailService;
 
     @Autowired
-    public ExerciseController(ExerciseService exerciseService, EmailService emailService) {
+    public ExerciseController(ExerciseService exerciseService) {
         this.exerciseService = exerciseService;
-        this.emailService = emailService;
-    }
-
-    @GetMapping("/send-test-email")
-    public ResponseEntity<String> sendTestEmail() {
-        try {
-            emailService.sendTestEmail(1L);
-            return ResponseEntity.ok("Test email sent successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to send email: " + e.getMessage());
-        }
     }
 
     @GetMapping("/exercises/save-exercises")
